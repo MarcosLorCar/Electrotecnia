@@ -12,7 +12,6 @@ class Complex:
     def __init__(self, expr: str = None, freq: float = 50):
         self.real: float = 0.0
         self.complex: float = 0.0
-        print(expr)
         if expr[0] in ('(', '['):
             # Compound
             depth: int = 0
@@ -20,7 +19,6 @@ class Complex:
             values: list[Complex] = []
             for c in expr[1:-1]:
                 if c == '+' and depth == 0:
-                    print(value)
                     values.append(Complex(value, freq))
                     value = ""
                 elif c in ('(', '['):
@@ -396,16 +394,17 @@ def update_canvas():
 
 def calc_imp():
     string = circuit.to_string()
-    print(string)
-    imp_total = Complex(string)
+    imp_total = Complex(string, float(freq_entry.get()))
     popup_window = Toplevel(root)
 
     label_real = ttk.Label(popup_window, text=imp_total.real, padding='10 10 10 10', justify='center')
     label_complex = ttk.Label(popup_window, text=str(imp_total.complex)+'j', padding='10 10 10 10', justify='center')
+    label_polar = ttk.Label(popup_window, text=str(math.sqrt(imp_total.real**2+imp_total.complex**2))+" @ "+str(math.atan2(imp_total.complex, imp_total.real))+"º")
     ok_button = ttk.Button(popup_window, text='Ok', padding='10 10 10 10', command=lambda: popup_window.destroy())
 
     label_real.pack()
     label_complex.pack()
+    label_polar.pack()
     ok_button.pack()
 
     center_window(popup_window)
@@ -448,6 +447,9 @@ if __name__ == '__main__':
     clear_button = ttk.Button(mainframe, text='Clear', command=lambda: clear_circuit())
     view_button = ttk.Button(mainframe, text='View', command=lambda: change_mode('view'), state='disabled')
     calc_button = ttk.Button(mainframe, text='Calc', command=lambda: calc_imp())
+    freq_frame = ttk.Frame(mainframe)
+    freq_entry = ttk.Entry(freq_frame)
+    freq_entry.insert(0, "50")
 
     # layout
     circuitCanvas.pack(side='left', expand=True, fill='both')
@@ -455,6 +457,10 @@ if __name__ == '__main__':
     view_button.pack(fill='both', ipady=10)
     clear_button.pack(fill='both', ipady=10)
     calc_button.pack(fill='both', ipady=10)
+    freq_frame.pack()
+    ttk.Label(freq_frame, text='Hz').pack(side='right')
+    freq_entry.pack(side='right', fill='both')
+    
 
     circuitCanvas.bind("<Configure>",
                        lambda x: update_canvas())
